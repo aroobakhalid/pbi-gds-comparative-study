@@ -1,0 +1,69 @@
+GDS CALCULATED FIELDS USED IN THIS STUDY
+
+Paper: Comparative Analysis of Data Visualization Tools and 
+       Techniques: A Case Study of Power BI and Google Data Studio
+Platform: Google Data Studio (accessed via Google Chrome)
+
+
+-----------------------------------------------------------
+AMAZON DASHBOARD - SCATTER CHART LABEL ABBREVIATION
+-----------------------------------------------------------
+
+Field Name: Category_abbv
+Purpose: Abbreviate full product category names to resolve 
+         scatter chart label overlap in GDS
+Used in: Category Performance Matrix (Scatter Chart)
+Reason: GDS scatter chart rendered full-length category names 
+        with considerable overlap; this CASE-based field was 
+        created as a workaround to improve readability
+
+CASE 
+  WHEN product_category = "Beauty" THEN "BTY"
+  WHEN product_category = "Books" THEN "BKS"
+  WHEN product_category = "Fashion" THEN "FSH"
+  WHEN product_category = "Home & Kitchen" THEN "H&K"
+  WHEN product_category = "Electronics" THEN "ELC"
+  WHEN product_category = "Sports" THEN "SPT"
+  ELSE "Misc"
+END
+
+------------------------------------------------------------
+WALMART DASHBOARD - SCATTER CHART LABEL ABBREVIATION
+------------------------------------------------------------
+
+Field Name: category_abv
+Purpose: Same as above - abbreviate product line names for 
+         scatter chart readability in GDS
+Used in: Category Performance Matrix (Scatter Chart)
+
+CASE 
+  WHEN Product_line = "Food and beverages" THEN "F&B"
+  WHEN Product_line = "Fashion accessories" THEN "FA"
+  WHEN Product_line = "Electronic accessories" THEN "EA"
+  WHEN Product_line = "Home and lifestyle" THEN "H&L"
+  WHEN Product_line = "Sports and travel" THEN "S&T"
+  WHEN Product_line = "Health and beauty" THEN "H&B"
+  ELSE "Other"
+END
+
+Note: This label handling behaviour was observed in the default 
+scatter chart configuration of GDS at the time of evaluation.
+
+------------------------------------------------------------
+GAUGE TARGET VALUES (STATIC CONSTANTS)
+------------------------------------------------------------
+
+Amazon Gauge:
+  Metric: SUM(total_revenue)
+  Target: 82200000 ($32.87M x 2.5)
+  Scale: 0 to 100,000,000
+
+Walmart Gauge:
+  Metric: SUM(Total)
+  Target: 807425 ($322.97K x 2.5)
+  Scale: 0 to 1,000,000
+
+Note: GDS gauge chart does not support calculated field-based 
+targets in the configuration evaluated. These values were 
+entered as static constants to match the PBI DAX-derived 
+targets. See dax/dax_measures.txt for the PBI implementation.
