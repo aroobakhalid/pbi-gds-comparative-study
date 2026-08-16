@@ -1,0 +1,71 @@
+
+POWER QUERY M CODE - AMAZON SALES DATASET
+
+Paper: Comparative Analysis of Data Visualization Tools and 
+       Techniques: A Case Study of Power BI and Google Data Studio
+Platform: Microsoft Power BI Desktop 2.154.1260.0 (64-bit)
+
+
+TRANSFORMATION STEPS SUMMARY:
+1. Import CSV (13 columns, comma-delimited)
+2. Promote headers
+3. Assign data types (date, integer, number, text)
+4. Sort by order_date ascending
+5. Remove duplicate order_id records
+6. Filter ratings to valid range (1-5)
+7. Replace zero review_count values with null
+8. Add Has_Review flag column (0 or 1)
+9. Reorder columns
+10. Extract date hierarchy: Year, Month Name, Quarter, Day Name
+11. Final column reorder
+
+----------------------------------------------------------------------------------
+M CODE
+
+
+let
+    Source = Csv.Document(
+        File.Contents("C:\Users\aroob\OneDrive\Desktop\dataset\Datasets\amazon_sales_dataset.csv"),
+        [Delimiter=",", Columns=13, Encoding=1252, QuoteStyle=QuoteStyle.None]
+    ),
+    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"order_id", Int64.Type}, 
+        {"order_date", type date}, 
+        {"product_id", Int64.Type}, 
+        {"product_category", type text}, 
+        {"price", type number}, 
+        {"discount_percent", Int64.Type}, 
+        {"quantity_sold", Int64.Type}, 
+        {"customer_region", type text}, 
+        {"payment_method", type text}, 
+        {"rating", type number}, 
+        {"review_count", Int64.Type}, 
+        {"discounted_price", type number}, 
+        {"total_revenue", type number}
+    }),
+    #"Sorted Rows" = Table.Sort(#"Changed Type",{{"order_date", Order.Ascending}}),
+    #"Removed Duplicates" = Table.Distinct(#"Sorted Rows", {"order_id"}),
+    #"Filtered Rows" = Table.SelectRows(#"Removed Duplicates", each [rating] >= 1 and [rating] <= 5),
+    #"Replaced Value" = Table.ReplaceValue(#"Filtered Rows",0,null,Replacer.ReplaceValue,{"review_count"}),
+    #"Added Conditional Column" = Table.AddColumn(#"Replaced Value", "Has_Review", each if [review_count] = 0 then 0 else 1),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Added Conditional Column",{{"Has_Review", Int64.Type}}),
+    #"Reordered Columns" = Table.ReorderColumns(#"Changed Type1",{
+        "order_id", "order_date", "product_id", "product_category", 
+        "price", "discount_percent", "quantity_sold", "discounted_price", 
+        "total_revenue", "customer_region", "payment_method", "rating", 
+        "review_count", "Has_Review"
+    }),
+    #"Inserted Year" = Table.AddColumn(#"Reordered Columns", "Year", each Date.Year([order_date]), Int64.Type),
+    #"Inserted Month Name" = Table.AddColumn(#"Inserted Year", "Month Name", each Date.MonthName([order_date]), type text),
+    #"Inserted Quarter" = Table.AddColumn(#"Inserted Month Name", "Quarter", each Date.QuarterOfYear([order_date]), Int64.Type),
+    #"Inserted Day Name" = Table.AddColumn(#"Inserted Quarter", "Day Name", each Date.DayOfWeekName([order_date]), type text),
+    #"Reordered Columns1" = Table.ReorderColumns(#"Inserted Day Name",{
+        "order_id", "order_date", "Month Name", "Quarter", "Day Name", 
+        "product_id", "product_category", "price", "discount_percent", 
+        "quantity_sold", "discounted_price", "total_revenue", 
+        "customer_region", "payment_method", "rating", "review_count", 
+        "Has_Review", "Year"
+    })
+in
+    #"Reordered Columns1"
