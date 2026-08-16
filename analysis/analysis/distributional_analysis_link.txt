@@ -1,0 +1,9 @@
+Distributional Analysis: CV, Fisher's Skewness, Normalized Shannon Entropy
+
+Google Colab Notebook:
+https://colab.research.google.com/drive/1mOkShYZqOMrxAALBqcYaymlPHjQCnN0u?usp=sharing
+
+This notebook computes the coefficient of variation, Fisher's skewness 
+coefficient, and normalized Shannon entropy for revenue across product 
+categories, geographic regions, and payment methods for both the Amazon 
+and Walmart datasets. Results are reported in Table 3 of the paper.
