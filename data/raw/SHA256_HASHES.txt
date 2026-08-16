@@ -1,0 +1,11 @@
+SHA-256 FILE INTEGRITY HASHES
+
+Paper: Comparative Analysis of Data Visualization Tools and 
+       Techniques: A Case Study of Power BI and Google Data Studio
+
+
+Amazon Sales Dataset (amazon_sales_dataset.csv):
+SHA256: 18e7ef81b20a800ef370b74a6d8981d4f5257fd628b43d921a5a998c14b5742c
+
+Walmart Product Sales Dataset (WalmartSalesData.csv):
+SHA256: 3a8492a2e837f58063d4c3d164bc03d2a839c2ca2d649b96a971b9ba0d6b9196
