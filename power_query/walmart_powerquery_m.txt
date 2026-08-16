@@ -1,0 +1,78 @@
+
+POWER QUERY M CODE - WALMART PRODUCT SALES DATASET
+
+Paper: Comparative Analysis of Data Visualization Tools and 
+       Techniques: A Case Study of Power BI and Google Data Studio
+Platform: Microsoft Power BI Desktop 2.154.1260.0 (64-bit)
+
+
+TRANSFORMATION STEPS SUMMARY:
+1. Import CSV (17 columns, comma-delimited)
+2. Promote headers
+3. Assign data types (date, time, integer, number, text)
+4. Reorder columns for logical grouping
+5. Sort by Date ascending
+6. Remove duplicate Invoice ID records
+7. Filter ratings to valid range (1-10)
+8. Remove constant column (gross margin percentage, SD=0)
+9. Extract date hierarchy: Month, Day of the week
+10. Rename columns for consistency
+11. Standardise payment value ("Ewallet" to "E-Wallet")
+
+
+------------------------------------------------------------------------------------------------------
+M CODE
+
+let
+    Source = Csv.Document(
+        File.Contents("C:\Users\aroob\OneDrive\Desktop\dataset\Datasets\WalmartSalesData.csv (1).csv"),
+        [Delimiter=",", Columns=17, Encoding=1252, QuoteStyle=QuoteStyle.None]
+    ),
+    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"Invoice ID", type text}, 
+        {"Branch", type text}, 
+        {"City", type text}, 
+        {"Customer type", type text}, 
+        {"Gender", type text}, 
+        {"Product line", type text}, 
+        {"Unit price", type number}, 
+        {"Quantity", Int64.Type}, 
+        {"Tax 5%", type number}, 
+        {"Total", type number}, 
+        {"Date", type date}, 
+        {"Time", type time}, 
+        {"Payment", type text}, 
+        {"cogs", type number}, 
+        {"gross margin percentage", type number}, 
+        {"gross income", type number}, 
+        {"Rating", type number}
+    }),
+    #"Reordered Columns" = Table.ReorderColumns(#"Changed Type",{
+        "Invoice ID", "Date", "Time", "Product line", "Quantity", 
+        "Unit price", "cogs", "Tax 5%", "Total", 
+        "gross margin percentage", "gross income", "Payment", 
+        "Branch", "City", "Customer type", "Gender", "Rating"
+    }),
+    #"Sorted Rows" = Table.Sort(#"Reordered Columns",{{"Date", Order.Ascending}}),
+    #"Removed Duplicates" = Table.Distinct(#"Sorted Rows", {"Invoice ID"}),
+    #"Filtered Rows" = Table.SelectRows(#"Removed Duplicates", each [Rating] >= 1 and [Rating] <= 10),
+    #"Removed Columns" = Table.RemoveColumns(#"Filtered Rows",{"gross margin percentage"}),
+    #"Inserted Month" = Table.AddColumn(#"Removed Columns", "Month", each Date.MonthName([Date]), type text),
+    #"Reordered Columns1" = Table.ReorderColumns(#"Inserted Month",{
+        "Invoice ID", "Date", "Month", "Time", "Product line", 
+        "Quantity", "Unit price", "cogs", "Tax 5%", "Total", 
+        "gross income", "Payment", "Branch", "City", 
+        "Customer type", "Gender", "Rating"
+    }),
+    #"Inserted Day of the week" = Table.AddColumn(#"Reordered Columns1", "Day of the week", each Date.DayOfWeekName([Date]), type text),
+    #"Reordered Columns2" = Table.ReorderColumns(#"Inserted Day of the week",{
+        "Invoice ID", "Date", "Month", "Day of the week", "Time", 
+        "Product line", "Quantity", "Unit price", "cogs", "Tax 5%", 
+        "Total", "gross income", "Payment", "Branch", "City", 
+        "Customer type", "Gender", "Rating"
+    }),
+    #"Replaced Value" = Table.ReplaceValue(#"Reordered Columns2","Ewallet","E-Wallet",Replacer.ReplaceText,{"Payment"})
+in
+    #"Replaced Value"
+
